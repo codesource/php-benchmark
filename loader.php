@@ -37,7 +37,7 @@ if (strtolower(php_sapi_name()) === "cli") {
 }
 
 // Run tests
-$handler = opendir('Classes/Tests');
+$handler = opendir(__DIR__ . '/Classes/Tests');
 $output->open();
 while (($file = readdir($handler)) !== false) {
     if (substr($file, -8) === 'Test.php') {
