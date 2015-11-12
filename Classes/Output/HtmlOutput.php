@@ -72,7 +72,28 @@ class HtmlOutput extends AbstractOutput
      * @return string
      */
     public function open(){
-        echo '<!DOCTYPE html><html><head><title>PHP Benchmarks</title></head><body>';
+        echo '<!DOCTYPE html>
+            <html>
+                <head>
+                    <title>PHP Benchmarks</title>
+                    <style type="text/css">
+                        *{
+                            font-family: verdana;
+                        }
+                        table{
+                            background-color: #dddddd;
+                        }
+                        table th{
+                            background-color: #888888;
+                            color: #ffffff;
+                            padding: 0.2em 0.5em;
+                        }
+                        table td{
+                            padding: 0.2em 0.5em;
+                        }
+                    </style>
+                </head>
+                <body>';
     }
 
     /**
