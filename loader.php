@@ -24,6 +24,9 @@
 require_once('Classes/Core/ClassLoader.php');
 spl_autoload_register(array(\CDSRC\PhpBenchmark\Core\ClassLoader::getInstance(), 'load'));
 
+// Force some configuration
+ini_set('ignore_repeated_errors', 1);
+
 // Default values
 $iterations = 1000000;
 

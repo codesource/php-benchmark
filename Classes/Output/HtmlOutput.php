@@ -41,26 +41,28 @@ class HtmlOutput extends AbstractOutput
         if ($test->getDescription() !== '') {
             $content .= '<h3>' . $test->getDescription() . '</h3>';
         }
-        $data = $test->getData();
-        if (empty($data) || !is_array($data['header']) || !is_array($data['rows'])) {
-            $content .= '<strong style="color:red">Test has no data</strong>';
-        } else {
-            $content .= '<table><thead><tr>';
-            $headersCount = count($data['header']);
-            for ($i = 0; $i < $headersCount; $i++) {
-                $content .= '<th>' . $data['header'][$i] . '</th>';
-            }
-            $content .= '</tr></thead><tbody>';
-            for ($i = 0, $ni = count($data['rows']); $i < $ni; $i++) {
-                if (is_array($data['rows'][$i])) {
-                    $content .= '<tr>';
-                    for ($j = 0; $j < $headersCount; $j++) {
-                        $content .= '<td>' . $data['rows'][$i][$j] . '</td>';
-                    }
-                    $content .= '</tr>';
+        $multipleData = $test->getData();
+        foreach($multipleData as $data) {
+            if (empty($data) || !is_array($data['header']) || !is_array($data['rows'])) {
+                $content .= '<strong style="color:red">Test has no data</strong>';
+            } else {
+                $content .= '<table><thead><tr>';
+                $headersCount = count($data['header']);
+                for ($i = 0; $i < $headersCount; $i++) {
+                    $content .= '<th>' . $data['header'][$i] . '</th>';
                 }
+                $content .= '</tr></thead><tbody>';
+                for ($i = 0, $ni = count($data['rows']); $i < $ni; $i++) {
+                    if (is_array($data['rows'][$i])) {
+                        $content .= '<tr>';
+                        for ($j = 0; $j < $headersCount; $j++) {
+                            $content .= '<td>' . $data['rows'][$i][$j] . '</td>';
+                        }
+                        $content .= '</tr>';
+                    }
+                }
+                $content .= '</tbody></table><br/><br/>';
             }
-            $content .= '</tbody></table><br/><br/>';
         }
 
         echo $content;

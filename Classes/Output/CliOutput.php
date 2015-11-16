@@ -41,46 +41,48 @@ class CliOutput extends AbstractOutput
         if ($test->getDescription() !== '') {
             $content .= $test->getDescription() . "\n";
         }
-        $data = $test->getData();
-        if (empty($data) || !is_array($data['header']) || !is_array($data['rows'])) {
-            $content .= str_repeat('=', 60) . "\n!!! Test has no data\n";
-        } else {
-            $lengths = array();
-            $headersCount = count($data['header']);
-            for ($i = 0; $i < $headersCount; $i++) {
-                $lengths[$i] = strlen($data['header'][$i]);
-            }
-            for ($i = 0, $ni = count($data['rows']); $i < $ni; $i++) {
-                if (is_array($data['rows'][$i])) {
-                    for ($j = 0; $j < $headersCount; $j++) {
-                        if (isset($data['rows'][$i][$j])) {
-                            $lengths[$j] = max($lengths[$j], strlen($data['rows'][$i][$j]));
+        $multipleData = $test->getData();
+        foreach($multipleData as $data) {
+            if (empty($data) || !is_array($data['header']) || !is_array($data['rows'])) {
+                $content .= str_repeat('=', 60) . "\n!!! Test has no data\n";
+            } else {
+                $lengths = array();
+                $headersCount = count($data['header']);
+                for ($i = 0; $i < $headersCount; $i++) {
+                    $lengths[$i] = strlen($data['header'][$i]);
+                }
+                for ($i = 0, $ni = count($data['rows']); $i < $ni; $i++) {
+                    if (is_array($data['rows'][$i])) {
+                        for ($j = 0; $j < $headersCount; $j++) {
+                            if (isset($data['rows'][$i][$j])) {
+                                $lengths[$j] = max($lengths[$j], strlen($data['rows'][$i][$j]));
+                            }
                         }
                     }
                 }
-            }
-            $finalLength = array_sum($lengths) + ($headersCount * 4) - 1;
-            $rowSeparator = "\n" . str_repeat('-', $finalLength) . "\n";
-            $sectionSeparator = "\n" . str_repeat('=', $finalLength) . "\n";
-            $content = $sectionSeparator . $content . str_repeat('=', $finalLength) . "\n";
-            $cellSeparator = '';
-            for ($i = 0; $i < $headersCount; $i++) {
-                $content .= $cellSeparator . ' ' . str_pad($data['header'][$i], $lengths[$i], ' ', STR_PAD_RIGHT) . '  ';
-                $cellSeparator = '|';
-            }
-            $content .= $sectionSeparator;
-            for ($i = 0, $ni = count($data['rows']); $i < $ni; $i++) {
-                if (is_array($data['rows'][$i])) {
-                    $cellSeparator = '';
-                    if (!isset($data['rows'][$i][1])) {
-                        $content .= ' ' . $data['rows'][$i][0];
-                        $content .= $sectionSeparator;
-                    } else {
-                        for ($j = 0; $j < $headersCount; $j++) {
-                            $content .= $cellSeparator . ' ' . str_pad($data['rows'][$i][$j], $lengths[$j], ' ', STR_PAD_RIGHT) . '  ';
-                            $cellSeparator = '|';
+                $finalLength = array_sum($lengths) + ($headersCount * 4) - 1;
+                $rowSeparator = "\n" . str_repeat('-', $finalLength) . "\n";
+                $sectionSeparator = "\n" . str_repeat('=', $finalLength) . "\n";
+                $content = $sectionSeparator . $content . str_repeat('=', $finalLength) . "\n";
+                $cellSeparator = '';
+                for ($i = 0; $i < $headersCount; $i++) {
+                    $content .= $cellSeparator . ' ' . str_pad($data['header'][$i], $lengths[$i], ' ', STR_PAD_RIGHT) . '  ';
+                    $cellSeparator = '|';
+                }
+                $content .= $sectionSeparator;
+                for ($i = 0, $ni = count($data['rows']); $i < $ni; $i++) {
+                    if (is_array($data['rows'][$i])) {
+                        $cellSeparator = '';
+                        if (!isset($data['rows'][$i][1])) {
+                            $content .= ' ' . $data['rows'][$i][0];
+                            $content .= $sectionSeparator;
+                        } else {
+                            for ($j = 0; $j < $headersCount; $j++) {
+                                $content .= $cellSeparator . ' ' . str_pad($data['rows'][$i][$j], $lengths[$j], ' ', STR_PAD_RIGHT) . '  ';
+                                $cellSeparator = '|';
+                            }
+                            $content .= $rowSeparator;
                         }
-                        $content .= $rowSeparator;
                     }
                 }
             }
