@@ -44,12 +44,6 @@ class StringTest extends AbstractTest
     public function __construct($iterations = 1000000)
     {
         parent::__construct('String comparison', '', $iterations);
-        $this->references = array(
-            '',
-            str_repeat('=', 10),
-            str_repeat('=', 100),
-            str_repeat('=', 1000)
-        );
     }
 
     /**
@@ -59,27 +53,30 @@ class StringTest extends AbstractTest
      */
     public function run()
     {
-        $this->data = array(
-            'header' => array('Function', 'Empty String' , 'Small string (10)', 'Medium string (100)', 'Large string (1000)', 'Total', 'Percentage'),
-            'rows' => array()
-        );
-        $this->data['rows'] = array_merge($this->data['rows'], $this->testEmptyStringDetection());
+        $this->data = array_merge($this->data, $this->testEmptyStringDetection());
+        $this->data = array_merge($this->data, $this->testStringStartWithDetection());
         return $this;
     }
 
 
     /**
-     * Test if on
+     * Test if string is empty
      *
      * @return array
      */
     protected function testEmptyStringDetection()
     {
         $data = array();
+        $references = array(
+            '',
+            str_repeat('=', 10),
+            str_repeat('=', 100),
+            str_repeat('=', 1000)
+        );
         
         // Test against empty()
         $currentData = array('if(empty($string))');
-        foreach ($this->references as $reference) {
+        foreach ($references as $reference) {
             $start = microtime(true);
             for($i=0;$i<$this->iterations; $i++) {
                 if (empty($reference)) {
@@ -91,7 +88,7 @@ class StringTest extends AbstractTest
 
         // Test against ===
         $currentData = array('if($string === \'\')');
-        foreach ($this->references as $reference) {
+        foreach ($references as $reference) {
             $start = microtime(true);
             for($i=0;$i<$this->iterations; $i++) {
                 if ($reference === '') {
@@ -103,7 +100,7 @@ class StringTest extends AbstractTest
 
         // Test against ==
         $currentData = array('if($string == \'\')');
-        foreach ($this->references as $reference) {
+        foreach ($references as $reference) {
             $start = microtime(true);
             for($i=0;$i<$this->iterations; $i++) {
                 if ($reference == '') {
@@ -115,7 +112,7 @@ class StringTest extends AbstractTest
 
         // Test against (bool)
         $currentData = array('if((bool)$string)');
-        foreach ($this->references as $reference) {
+        foreach ($references as $reference) {
             $start = microtime(true);
             for($i=0;$i<$this->iterations; $i++) {
                 if ((bool)$reference) {
@@ -127,7 +124,7 @@ class StringTest extends AbstractTest
 
         // Test against ($string)
         $currentData = array('if($string)');
-        foreach ($this->references as $reference) {
+        foreach ($references as $reference) {
             $start = microtime(true);
             for($i=0;$i<$this->iterations; $i++) {
                 if ($reference) {
@@ -139,6 +136,127 @@ class StringTest extends AbstractTest
 
         $this->setTotalAndPercentage($data);
         $this->addSectionLine($data, 'Empty String Detection');
+
+        return array(
+            array(
+                'header' => array('Function', 'Empty String' , 'Small string (10)', 'Medium string (100)', 'Large string (1000)', 'Total', 'Percentage'),
+                'rows' => $data
+            )
+        );
+    }
+
+    protected function testStringStartWithDetection(){
+        $data = array(
+            array(
+                'header' => array('Function', 'Empty haystack & Empty needle' , 'Empty haystack & Small string (8)' , 'Empty haystack & Small string (8)', 'Total', 'Percentage'),
+                'rows' => array()
+            ),
+            array(
+                'header' => array('Function', 'Small haystack(10) & Empty needle' , 'Small haystack(10) & Needle present(8)' , 'Small haystack(10) & Needle absent (8)', 'Total', 'Percentage'),
+                'rows' => array()
+            ),
+            array(
+                'header' => array('Function', 'Medium haystack(100) & Empty needle' , 'Medium haystack(100) & Needle present(8)' , 'Medium haystack(100) & Needle absent (8)', 'Total', 'Percentage'),
+                'rows' => array()
+            ),
+            array(
+                'header' => array('Function', 'Large haystack(1000) & Empty needle' , 'Large haystack(1000) & Needle present(8)' , 'Large haystack(1000) & Needle absent (8)', 'Total', 'Percentage'),
+                'rows' => array()
+            )
+        );
+        
+        $haystacks = array(
+            '',
+            str_repeat('=', 10),
+            str_repeat('=', 100),
+            str_repeat('=', 1000)
+        );
+        $needles = array(
+            '',
+            str_repeat('=', 8),
+            str_repeat('-', 8)
+        );
+
+        foreach ($haystacks as $hKey => $haystack) {
+            $currentRow = array('if(strncmp($haystack, $needle, strlen($needle)) === 0)');
+            foreach($needles as $needle) {
+                $start = microtime(true);
+                for ($i = 0; $i < $this->iterations; $i++) {
+                    if (strncmp($haystack, $needle, strlen($needle)) === 0) {
+                    }
+                }
+                $currentRow[] = microtime(true) - $start;
+            }
+            $data[$hKey]['rows'][] = $currentRow;
+        }
+
+        foreach ($haystacks as $hKey => $haystack) {
+            $currentRow = array('if(strncasecmp($haystack, $needle, strlen($needle)) === 0)');
+            foreach($needles as $needle) {
+                $start = microtime(true);
+                for ($i = 0; $i < $this->iterations; $i++) {
+                    if (strncasecmp($haystack, $needle, strlen($needle)) === 0) {
+                    }
+                }
+                $currentRow[] = microtime(true) - $start;
+            }
+            $data[$hKey]['rows'][] = $currentRow;
+        }
+
+        foreach ($haystacks as $hKey => $haystack) {
+            $currentRow = array('if($needle === \'\' || strpos($haystack, $needle) === 0)');
+            foreach($needles as $needle) {
+                $start = microtime(true);
+                for ($i = 0; $i < $this->iterations; $i++) {
+                    if ($needle === '' || strpos($haystack, $needle) === 0) {
+                    }
+                }
+                $currentRow[] = microtime(true) - $start;
+            }
+            $data[$hKey]['rows'][] = $currentRow;
+        }
+
+        foreach ($haystacks as $hKey => $haystack) {
+            $currentRow = array('if(substr($haystack, 0, strlen($needle)) === $needle)');
+            foreach($needles as $needle) {
+                $start = microtime(true);
+                for ($i = 0; $i < $this->iterations; $i++) {
+                    if (substr($haystack, 0, strlen($needle)) === $needle) {
+                    }
+                }
+                $currentRow[] = microtime(true) - $start;
+            }
+            $data[$hKey]['rows'][] = $currentRow;
+        }
+
+        foreach ($haystacks as $hKey => $haystack) {
+            $currentRow = array('if(strcmp(substr($haystack, 0, strlen($needle)), $needle) === 0)');
+            foreach($needles as $needle) {
+                $start = microtime(true);
+                for ($i = 0; $i < $this->iterations; $i++) {
+                    if (strcmp(substr($haystack, 0, strlen($needle)), $needle) === 0) {
+                    }
+                }
+                $currentRow[] = microtime(true) - $start;
+            }
+            $data[$hKey]['rows'][] = $currentRow;
+        }
+
+        foreach ($haystacks as $hKey => $haystack) {
+            $currentRow = array('if(preg_match("/^" . preg_quote($needle, "/") . "/", $haystack))');
+            foreach($needles as $needle) {
+                $start = microtime(true);
+                for ($i = 0; $i < $this->iterations; $i++) {
+                    if (preg_match("/^" . preg_quote($needle, "/") . "/", $haystack)) {
+                    }
+                }
+                $currentRow[] = microtime(true) - $start;
+            }
+            $data[$hKey]['rows'][] = $currentRow;
+        }
+        foreach($data as &$rows){
+            $this->setTotalAndPercentage($rows['rows']);
+        }
 
         return $data;
     }
